@@ -59,6 +59,7 @@ from nanogpt.config import Config
 from nanogpt.model import GPT
 
 torch.set_num_threads(max(1, os.cpu_count() or 1))
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # ---------------------------------------------------------------- PDFA
@@ -177,7 +178,7 @@ def make_model(n_symbols: int, seq_len: int, d_model: int, n_layers: int, seed: 
         seed=seed,
     )
     torch.manual_seed(seed)
-    return GPT(cfg)
+    return GPT(cfg).to(DEVICE)
 
 
 def train(model: GPT, x: torch.Tensor, steps: int, lr: float, batch: int = 128):
@@ -187,7 +188,7 @@ def train(model: GPT, x: torch.Tensor, steps: int, lr: float, batch: int = 128):
     model.train()
     for step in range(steps):
         idx = torch.randint(0, x.shape[0], (batch,), generator=gen)
-        xb = x[idx]
+        xb = x[idx].to(DEVICE)
         logits = model(xb[:, :-1])
         loss = F.cross_entropy(
             logits.reshape(-1, logits.shape[-1]), xb[:, 1:].reshape(-1)
@@ -202,6 +203,7 @@ def train(model: GPT, x: torch.Tensor, steps: int, lr: float, batch: int = 128):
 @torch.no_grad()
 def eval_loss(model: GPT, x: torch.Tensor) -> float:
     model.eval()
+    x = x.to(DEVICE)
     logits = model(x[:, :-1])
     return float(
         F.cross_entropy(logits.reshape(-1, logits.shape[-1]), x[:, 1:].reshape(-1))
@@ -212,13 +214,13 @@ def eval_loss(model: GPT, x: torch.Tensor) -> float:
 def residuals(model: GPT, x: torch.Tensor) -> list[tuple[str, np.ndarray]]:
     """Residual stream at every position: after embedding, each block, final norm."""
     model.eval()
-    h = model.tok_emb(x)
+    h = model.tok_emb(x.to(DEVICE))
     out = [("embed", h)]
     for i, block in enumerate(model.blocks):
         h = block(h)
         out.append((f"block{i}", h))
     out.append(("norm_f", model.norm_f(h)))
-    return [(name, t.numpy()) for name, t in out]
+    return [(name, t.float().cpu().numpy()) for name, t in out]
 
 
 # ---------------------------------------------------------------- metrics
