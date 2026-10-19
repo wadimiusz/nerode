@@ -186,6 +186,7 @@ def run_one(
     horizon: int,
     steps: int,
     seq_len: int = 24,
+    w_symbols: list[int] | None = None,
 ) -> dict:
     rng = np.random.default_rng(seed)
     if kind == "parity":
@@ -209,7 +210,8 @@ def run_one(
     n = len(psyms)
     prefixes = np.concatenate([np.full((n, 1), bos), psyms], 1)
 
-    ws = np.array(list(itertools.product(range(n_sym), repeat=w_len)))
+    w_alphabet = w_symbols if w_symbols is not None else list(range(n_sym))
+    ws = np.array(list(itertools.product(w_alphabet, repeat=w_len)))
     zs = np.array(list(itertools.product(range(n_sym), repeat=horizon)))
     iu = np.triu_indices(n, 1)
 
@@ -293,6 +295,14 @@ def main() -> None:
     ap.add_argument("--w-len", type=int, default=2)
     ap.add_argument("--horizon", type=int, default=3)
     ap.add_argument("--out", default="experiments/nerode_out/continuations.txt")
+    ap.add_argument(
+        "--w-symbols",
+        type=int,
+        nargs="+",
+        default=None,
+        help="restrict continuations to these symbols; e.g. 0 1 keeps the parity "
+        "of parity automata hidden and irrelevant to the next symbol",
+    )
     ap.add_argument("--quick", action="store_true", help="tiny smoke run")
     a = ap.parse_args()
     if a.quick:
@@ -312,7 +322,14 @@ def main() -> None:
         for seed in a.seeds:
             t0 = time.time()
             r = run_one(
-                kind, seed, a.n_prefix, a.prefix_len, a.w_len, a.horizon, a.steps
+                kind,
+                seed,
+                a.n_prefix,
+                a.prefix_len,
+                a.w_len,
+                a.horizon,
+                a.steps,
+                w_symbols=a.w_symbols,
             )
             emit(
                 f"\n{kind} PDFA, seed {seed}: {r['n_cls']} Nerode classes, "
