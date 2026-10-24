@@ -45,15 +45,18 @@ Run from the repo root:  uv run python experiments/nerode_geometry.py
 
 from __future__ import annotations
 
+import argparse
+import hashlib
 import os
 import time
-from collections.abc import Hashable
+from collections.abc import Callable, Hashable
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import torch
 import torch.nn.functional as F
+from tqdm.auto import tqdm
 
 from nanogpt.config import Config
 from nanogpt.model import GPT
@@ -181,14 +184,39 @@ def make_model(n_symbols: int, seq_len: int, d_model: int, n_layers: int, seed: 
     return GPT(cfg).to(DEVICE)
 
 
-def train(model: GPT, x: torch.Tensor, steps: int, lr: float, batch: int = 128):
+Monitor = Callable[[GPT], dict[str, str]]
+
+
+def _train_loop(
+    model: GPT,
+    next_batch: Callable[[], torch.Tensor],
+    steps: int,
+    lr: float,
+    desc: str | None = None,
+    h_opt: float | None = None,
+    monitor: Monitor | None = None,
+    monitor_every: int = 5000,
+) -> float:
+    """The training loop shared by `train` and `train_fresh`, with a progress
+    bar: smoothed training loss, its gap to the optimal loss `h_opt`, learning
+    rate, and whatever `monitor(model)` reports every `monitor_every` steps.
+    The bar and the monitor only read the model, so results do not change."""
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.0)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=lr, total_steps=steps)
-    gen = torch.Generator().manual_seed(0)
     model.train()
-    for step in range(steps):
-        idx = torch.randint(0, x.shape[0], (batch,), generator=gen)
-        xb = x[idx].to(DEVICE)
+    bar = tqdm(
+        range(steps),
+        desc=desc or "training",
+        unit="step",
+        leave=False,
+        dynamic_ncols=True,
+        mininterval=0.5,
+    )
+    info: dict[str, str] = {}
+    ema, n_ema = 0.0, 0  # bias-corrected moving average over ~10 readings
+    loss = torch.tensor(0.0)
+    for step in bar:
+        xb = next_batch()
         logits = model(xb[:, :-1])
         loss = F.cross_entropy(
             logits.reshape(-1, logits.shape[-1]), xb[:, 1:].reshape(-1)
@@ -197,7 +225,120 @@ def train(model: GPT, x: torch.Tensor, steps: int, lr: float, batch: int = 128):
         loss.backward()
         opt.step()
         sched.step()
+        if step % 50 == 0 or step == steps - 1:
+            n_ema += 1
+            ema = 0.9 * ema + 0.1 * float(loss.detach())
+            smooth = ema / (1 - 0.9**n_ema)
+            info["loss"] = f"{smooth:.4f}"
+            if h_opt is not None:
+                info["gap"] = f"{smooth - h_opt:+.4f}"
+            info["lr"] = f"{sched.get_last_lr()[0]:.1e}"
+            bar.set_postfix(info, refresh=False)
+        if monitor is not None and (step + 1) % monitor_every == 0:
+            info.update(monitor(model))
+            model.train()
+            bar.set_postfix(info, refresh=False)
+    bar.close()
     return float(loss.detach())
+
+
+def train(
+    model: GPT,
+    x: torch.Tensor,
+    steps: int,
+    lr: float,
+    batch: int = 128,
+    **progress,
+) -> float:
+    """Train on the finite dataset x (the pilot setup)."""
+    gen = torch.Generator().manual_seed(0)
+
+    def next_batch() -> torch.Tensor:
+        idx = torch.randint(0, x.shape[0], (batch,), generator=gen)
+        return x[idx].to(DEVICE)
+
+    return _train_loop(model, next_batch, steps, lr, **progress)
+
+
+def train_fresh(
+    model: GPT,
+    p: PDFA,
+    steps: int,
+    lr: float,
+    seq_len: int,
+    seed: int,
+    batch: int = 128,
+    **progress,
+) -> float:
+    """Like `train`, but every batch is a fresh sample from the automaton, so
+    the model cannot overfit a finite dataset and can be trained much longer."""
+    bos = p.n_symbols
+    rng = np.random.default_rng(10_000 + seed)
+
+    def next_batch() -> torch.Tensor:
+        syms, _ = sample(p, batch, seq_len, rng)
+        xb = np.concatenate([np.full((batch, 1), bos), syms], 1)
+        return torch.tensor(xb).to(DEVICE)
+
+    return _train_loop(model, next_batch, steps, lr, **progress)
+
+
+CKPT_DIR = Path(__file__).with_name("nerode_out") / "ckpt"
+
+
+def fit(
+    model: GPT,
+    p: PDFA,
+    x_tr: torch.Tensor,
+    *,
+    steps: int,
+    seed: int,
+    seq_len: int,
+    lr: float = 3e-3,
+    batch: int = 128,
+    fresh: bool = False,
+    cache: bool = True,
+    desc: str | None = None,
+    h_opt: float | None = None,
+    monitor: Monitor | None = None,
+) -> GPT:
+    """Train `model` in place, or load it from the checkpoint cache.
+
+    fresh=False is the original setup (`train` on the finite dataset x_tr).
+    fresh=True trains on new samples every batch (`train_fresh`).
+    The cache key covers the automaton itself and every training setting, so a
+    changed automaton or setting never picks up a stale checkpoint."""
+    cfg = model.cfg
+    h = hashlib.sha1()
+    for part in (
+        p.delta.tobytes(),
+        np.round(p.emit, 12).tobytes(),
+        repr((steps, seed, seq_len, lr, batch, fresh)).encode(),
+        repr((cfg.d_model, cfg.n_layers, cfg.n_heads, cfg.vocab_size)).encode(),
+    ):
+        h.update(part)
+    if not fresh:
+        h.update(x_tr.numpy().tobytes())
+    path = CKPT_DIR / f"{h.hexdigest()[:16]}.pt"
+    if cache and path.exists():
+        model.load_state_dict(torch.load(path, map_location=DEVICE))
+        tqdm.write(f"  {desc or 'model'}: loaded from cache ({path.name})")
+        return model
+    progress = dict(desc=desc, h_opt=h_opt, monitor=monitor)
+    t0 = time.time()
+    if fresh:
+        loss = train_fresh(model, p, steps, lr, seq_len, seed, batch, **progress)
+    else:
+        loss = train(model, x_tr, steps=steps, lr=lr, batch=batch, **progress)
+    msg = f"  {desc or 'model'}: trained {steps} steps in {time.time() - t0:.0f}s"
+    msg += f", last batch loss {loss:.4f}"
+    if h_opt is not None:
+        msg += f" (optimal {h_opt:.4f})"
+    tqdm.write(msg)
+    if cache:
+        CKPT_DIR.mkdir(parents=True, exist_ok=True)
+        torch.save(model.state_dict(), path)
+    return model
 
 
 @torch.no_grad()
@@ -352,6 +493,8 @@ def run_one(
     n_layers: int = 2,
     steps: int = 1500,
     plot_dir=None,
+    fresh: bool = False,
+    batch: int = 128,
 ):
     rng = np.random.default_rng(seed)
     p = random_pdfa(n_states, n_symbols, rng, shared=shared)
@@ -408,7 +551,19 @@ def run_one(
     for kind in ("random", "trained"):
         model = make_model(n_symbols, seq_len, d_model, n_layers, seed)
         if kind == "trained":
-            train(model, x_tr, steps=steps, lr=3e-3)
+            tag = "shared" if shared else "plain"
+            fit(
+                model,
+                p,
+                x_tr,
+                steps=steps,
+                seed=seed,
+                seq_len=seq_len,
+                batch=batch,
+                fresh=fresh,
+                desc=f"{tag} s{n_states} seed {seed}",
+                h_opt=h_opt,
+            )
         loss = eval_loss(model, x_te)
         res_tr = dict(residuals(model, x_tr[:, :seq_len]))
         res_te = dict(residuals(model, x_te[:, :seq_len]))
@@ -488,6 +643,13 @@ def plot_pca(res: dict, cls: np.ndarray, n_cls: int, path: Path, title: str):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--steps", type=int, default=1500)
+    ap.add_argument("--batch", type=int, default=128)
+    ap.add_argument(
+        "--fresh", action="store_true", help="train on fresh samples every batch"
+    )
+    a = ap.parse_args()
     out_dir = Path(os.environ.get("NERODE_OUT", "nerode_out"))
     out_dir.mkdir(exist_ok=True)
     # (n_states, n_symbols, seed, shared emissions)
@@ -501,16 +663,28 @@ def main():
     lines = []
 
     def emit(line: str):
-        print(line, flush=True)
+        tqdm.write(line)
         lines.append(line)
 
-    for n_states, n_symbols, seed, shared in settings:
-        r = run_one(n_states, n_symbols, seed, shared=shared, plot_dir=out_dir)
+    for n_states, n_symbols, seed, shared in tqdm(
+        settings, desc="automata", unit="automaton", dynamic_ncols=True
+    ):
+        r = run_one(
+            n_states,
+            n_symbols,
+            seed,
+            shared=shared,
+            plot_dir=out_dir,
+            steps=a.steps,
+            fresh=a.fresh,
+            batch=a.batch,
+        )
         emit(
             f"\n{'SHARED-emission' if shared else 'plain'} PDFA: {r['n_states']} states "
             f"-> {r['n_cls']} Nerode classes ({r['n_hidden_cls']} share their next-symbol "
             f"distribution), {r['n_symbols']} symbols, seed {r['seed']} ({r['secs']:.0f}s)"
         )
+        emit(f"  training: {a.steps} steps, batch {a.batch}, fresh data {a.fresh}")
         emit(
             f"  optimal loss {r['h_opt']:.3f} nats | class from (position, last token): "
             f"acc {r['trivial']:.3f}, within same-next-symbol groups "

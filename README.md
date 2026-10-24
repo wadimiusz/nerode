@@ -44,6 +44,31 @@ uv run python experiments/nerode_continuations.py --quick   # 30-second smoke ru
 uv run --with matplotlib python experiments/nerode_geometry.py   # with plots
 ```
 
+### Training longer, and checking that the model learned the automaton
+
+The pilot models were trained for 3000 steps on a fixed set of 5000 sequences,
+which left them short of the optimal loss. Three flags change that, and the
+defaults reproduce the pilot exactly:
+
+- `--fresh` draws a new batch from the automaton at every step, so training
+  can run much longer without overfitting a finite dataset;
+- `--min-sep 0.1` (parity automata) redraws emissions until every two groups
+  differ by at least that much KL; otherwise two groups can predict the next
+  symbol almost identically, and the hidden bit then barely matters;
+- `--kinds parity_hand` (and `demo_data.py --kind parity_hand`) uses one parity
+  automaton chosen by hand, with clearly different groups.
+
+Trained models are cached in `experiments/nerode_out/ckpt/`, keyed by the
+automaton and every training setting, so a second run only repeats the
+analysis. For parity automata the output also reports how well the trained
+model tracks the hidden bit, by prefix length.
+
+```bash
+uv run python experiments/nerode_continuations.py --kinds parity_hand parity plain \
+    --seeds 0 1 2 3 4 --fresh --steps 100000 --min-sep 0.1
+uv run python experiments/demo_data.py --kind parity_hand --fresh --steps 100000
+```
+
 ## What we found
 
 1. Classes that change the next symbol are linearly readable at the current

@@ -11,10 +11,13 @@ every prefix up to MAX_LEN symbols, records:
 Also exports KL(true || model) by position for "easy" and "hard" positions.
 
 Run from the repo root:  uv run python experiments/demo_data.py
+Well-trained model on the hand-chosen automaton (needs a GPU for a sane time):
+    uv run python experiments/demo_data.py --kind parity_hand --fresh --steps 100000
 """
 
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import itertools
 import json
@@ -45,16 +48,47 @@ def pca2(h: np.ndarray) -> np.ndarray:
 
 
 def main() -> None:
-    rng = np.random.default_rng(SEED)
-    p = nc.parity_pdfa(3, rng)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--kind", choices=["parity", "parity_hand"], default="parity")
+    ap.add_argument("--seed", type=int, default=SEED)
+    ap.add_argument("--steps", type=int, default=3000)
+    ap.add_argument("--batch", type=int, default=128)
+    ap.add_argument("--fresh", action="store_true", help="train on fresh samples")
+    ap.add_argument("--min-sep", type=float, default=0.0)
+    ap.add_argument("--out", default=str(_here / "nerode_out" / "demo_data.json"))
+    args = ap.parse_args()
+    seed = args.seed
+    rng = np.random.default_rng(seed)
+    if args.kind == "parity_hand":
+        p = nc.hand_parity_pdfa()
+    else:
+        p = nc.parity_pdfa(3, rng, min_sep=args.min_sep)
     cls_of_state = ng.minimise(p)
     n_sym, bos, seq_len = 3, 3, 24
 
     syms, states = ng.sample(p, 6000, seq_len, rng)
     x = torch.tensor(np.concatenate([np.full((len(syms), 1), bos), syms], 1))
-    model = ng.make_model(n_sym, seq_len, 64, 2, SEED)
-    ng.train(model, x[:5000], steps=3000, lr=3e-3)
+    model = ng.make_model(n_sym, seq_len, 64, 2, seed)
+
+    def monitor(m: torch.nn.Module) -> dict[str, str]:
+        acc = nc.parity_bit_accuracy(m, p)
+        return {"bit@3": f"{acc[3]:.3f}", "bit@7": f"{acc[7]:.3f}"}
+
+    ng.fit(
+        model,
+        p,
+        x[:5000],
+        steps=args.steps,
+        seed=seed,
+        seq_len=seq_len,
+        batch=args.batch,
+        fresh=args.fresh,
+        desc=f"{args.kind} seed {seed}",
+        h_opt=ng.entropy_rate(p, states),
+        monitor=monitor,
+    )
     loss = ng.eval_loss(model, x[5000:])
+    bit_acc = nc.parity_bit_accuracy(model, p, max_len=MAX_LEN)
     h_opt = ng.entropy_rate(p, states)
 
     prefixes = [
@@ -158,6 +192,15 @@ def main() -> None:
         automaton=automaton,
         loss=round(loss, 4),
         h_opt=round(h_opt, 4),
+        training=dict(
+            kind=args.kind,
+            seed=seed,
+            steps=args.steps,
+            batch=args.batch,
+            fresh=args.fresh,
+        ),
+        group_separation=round(nc.group_separation(p.emit[0::2]), 4),
+        bit_acc={str(k): round(v, 4) for k, v in bit_acc.items()},
         layer="block1",
         max_len=MAX_LEN,
         sep_now=round(sep(xy_now), 3),
@@ -166,10 +209,12 @@ def main() -> None:
         kl_easy=[round(v, 4) if v is not None else None for v in kl_easy],
         prefixes=records,
     )
-    out = _here / "nerode_out" / "demo_data.json"
-    out.parent.mkdir(exist_ok=True)
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, separators=(",", ":")))
     print(f"loss {loss:.3f} (optimal {h_opt:.3f}); {len(records)} prefixes")
+    acc = " ".join(f"{k}:{v:.3f}" for k, v in bit_acc.items())
+    print(f"hidden-bit accuracy by prefix length (weighted): {acc}")
     print(f"parity separation: at u {data['sep_now']}, after u+'2' {data['sep_after']}")
     print(f"written {out} ({out.stat().st_size // 1024} KB)")
 
