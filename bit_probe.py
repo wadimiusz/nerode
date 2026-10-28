@@ -106,8 +106,20 @@ def features(model, p, n_seq: int, rng: np.random.Generator) -> dict:
         "win": win[keep],
         "dist": dist[keep],
         "seq": seq_id[keep],
-        "layers": {name: h[keep] for name, h in res if name != "embed"},
+        "layers": _layer_features(res, keep),
     }
+
+
+def _layer_features(res, keep) -> dict:
+    """Each block and the final norm separately, plus "all": the token
+    embedding and every block concatenated, in case the bit is spread across
+    layers rather than held in any single one (Shai et al. 2024, RRXOR)."""
+    d = {name: h[keep] for name, h in res}
+    out = {name: v for name, v in d.items() if name != "embed"}
+    out["all"] = np.concatenate(
+        [d["embed"]] + [d[n] for n in d if n.startswith("block")], -1
+    )
+    return out
 
 
 def window_baseline(group, win, bit, tr, te, k: int) -> float:
@@ -192,6 +204,9 @@ def main() -> None:
     ap.add_argument("--min-sep", type=float, default=0.1)
     ap.add_argument("--n-seq", type=int, default=2500)
     ap.add_argument("--out", default="experiments/nerode_out/bit_probe.json")
+    ap.add_argument(
+        "--layers", nargs="+", default=["block0", "block1", "norm_f", "all"]
+    )
     a = ap.parse_args()
 
     rows: list[dict] = []
@@ -218,6 +233,8 @@ def main() -> None:
                 }
                 dte = np.minimum(f["dist"][te], 7)  # 7 means 7 or more
                 for layer, h in f["layers"].items():
+                    if layer not in a.layers:
+                        continue
                     lin, _ = fit_probe(
                         h[tr], f["bit"][tr], h[te], f["bit"][te], 2, None
                     )
@@ -249,7 +266,7 @@ def main() -> None:
 
     print("\nMLP probe for the bit, mean over models, by symbols since the last 2:")
     for model_kind in ("trained", "random"):
-        for layer in ("block0", "block1", "norm_f"):
+        for layer in a.layers:
             sel = [r for r in rows if r["model"] == model_kind and r["layer"] == layer]
             by = {
                 d: np.mean([r["mlp_by_symbols_since_2"][d] for r in sel])
