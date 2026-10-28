@@ -5,7 +5,7 @@ model on text from a probabilistic automaton, keeps the Myhill–Nerode class of
 a prefix in the residual stream. An interactive write-up of the results, with a
 demo: [wadimiusz.me/nerode](https://wadimiusz.me/nerode/).
 
-The model is the `GPT` from [nanogpt](https://github.com/wadimiusz/nanogpt),
+The model is the `GPT` from [centigpt](https://github.com/wadimiusz/centigpt),
 a GPT-style transformer written from scratch; this repository depends on it as
 a package, pinned to a commit.
 
@@ -26,7 +26,7 @@ stream at the prefix's last position?
 
 ## Setup
 
-All scripts train the `GPT` from nanogpt (2 layers, `d_model` 64) as an
+All scripts train the `GPT` from centigpt (2 layers, `d_model` 64) as an
 ordinary language model on text sampled from a small probabilistic automaton,
 where the classes are known exactly:
 
@@ -41,7 +41,7 @@ where the classes are known exactly:
 ## Running the experiments
 
 Requires Python 3.14 and [uv](https://docs.astral.sh/uv/). `make install`
-(or `uv sync`) creates the environment, including the pinned nanogpt.
+(or `uv sync`) creates the environment, including the pinned centigpt.
 
 Run from the repository root. Everything works on a CPU; a GPU is used when
 available. Outputs go to `out/` (override with the `NERODE_OUT` environment
@@ -234,7 +234,7 @@ Related work and the change log are on the
 
 `make check` runs the linter, the formatter check, the type checker and the
 tests, without modifying files; `make fix` applies ruff's autofixes and
-formatting. The settings are the same as in nanogpt and live in
+formatting. The settings are the same as in centigpt and live in
 `pyproject.toml`.
 
 ## License

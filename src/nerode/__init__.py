@@ -1,6 +1,6 @@
 """Where does a transformer keep its state?
 
-Experiments on whether a small GPT (from nanogpt), trained as a language model on
+Experiments on whether a small GPT (from centigpt), trained as a language model on
 text from a probabilistic automaton, keeps the Myhill–Nerode class of a prefix in
 the residual stream. Modules:
 

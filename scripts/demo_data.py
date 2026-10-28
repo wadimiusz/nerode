@@ -24,7 +24,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from nanogpt.model import GPT
+from centigpt.model import GPT
 
 from nerode.automata import (
     entropy_rate,

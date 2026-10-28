@@ -1,4 +1,4 @@
-# Makefile для nerode (копия Makefile из nanogpt без git-хуков).
+# Makefile для nerode (копия Makefile из centigpt без git-хуков).
 #
 # Все команды идут через `uv run`: активировать .venv вручную не нужно,
 # uv сам найдёт окружение и при необходимости досинхронизирует его.

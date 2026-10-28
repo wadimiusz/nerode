@@ -1,6 +1,6 @@
 """The model, the training loop and the checkpoint cache.
 
-`make_model` builds the nanogpt `GPT` for an alphabet of `n_symbols` symbols
+`make_model` builds the centigpt `GPT` for an alphabet of `n_symbols` symbols
 plus a BOS token. `fit` trains it as an ordinary language model on samples from
 a PDFA, either on a finite dataset (the pilot setup) or on fresh samples every
 batch, and caches the trained weights under a key that covers the automaton
@@ -22,8 +22,8 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn.functional as F
-from nanogpt.config import Config
-from nanogpt.model import GPT
+from centigpt.config import Config
+from centigpt.model import GPT
 from tqdm.auto import tqdm
 
 from nerode.automata import PDFA, sample

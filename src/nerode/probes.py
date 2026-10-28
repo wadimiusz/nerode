@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import numpy as np
 import torch
-from nanogpt.model import GPT
+from centigpt.model import GPT
 from torch import nn
 
 from nerode.automata import PDFA, hand_parity_pdfa, parity_pdfa, sample

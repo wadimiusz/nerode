@@ -8,7 +8,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Vadim Fomin", email = "wadimiusz@gmail.com" }]
 dependencies = [
-    "nanogpt",
+    "centigpt",
     "numpy>=2.5.2",
     "torch>=2.13.0",
     "tqdm>=4.67.1",
@@ -18,9 +18,9 @@ dependencies = [
 plots = ["matplotlib>=3.10"]
 
 [tool.uv.sources]
-# The model (GPT, Config) comes from nanogpt, pinned to a commit so that the
+# The model (GPT, Config) comes from centigpt, pinned to a commit so that the
 # results in results/ stay reproducible. Bump the rev on purpose, not by accident.
-nanogpt = { git = "https://github.com/wadimiusz/nanogpt", rev = "f51d8f15acd44870618c8de3dd1c36ad2f9bff8d" }
+centigpt = { git = "https://github.com/wadimiusz/centigpt", rev = "bb2fc8dfc0bffac7f3f1648680d3cb7a0ac9d736" }
 
 [build-system]
 requires = ["hatchling"]
@@ -37,7 +37,7 @@ dev = [
 ]
 
 # ---------------------------------------------------------------------------
-# ruff and mypy: the same settings as in nanogpt (see its pyproject.toml for
+# ruff and mypy: the same settings as in centigpt (see its pyproject.toml for
 # the reasoning and the measurements behind them).
 # ---------------------------------------------------------------------------
 [tool.ruff]
@@ -66,8 +66,8 @@ module = [
 ]
 ignore_missing_imports = true
 
-# nanogpt ships no py.typed marker either, but its source is annotated, so let
+# centigpt ships no py.typed marker either, but its source is annotated, so let
 # mypy read the installed package instead of treating GPT and Config as Any.
 [[tool.mypy.overrides]]
-module = ["nanogpt", "nanogpt.*"]
+module = ["centigpt", "centigpt.*"]
 follow_untyped_imports = true

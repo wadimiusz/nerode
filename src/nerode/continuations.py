@@ -49,7 +49,7 @@ import itertools
 
 import numpy as np
 import torch
-from nanogpt.model import GPT
+from centigpt.model import GPT
 from tqdm.auto import tqdm
 
 from nerode.automata import (

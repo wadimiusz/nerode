@@ -227,6 +227,21 @@ wheels = [
 ]
 
 [[package]]
+name = "centigpt"
+version = "0.1.0"
+source = { git = "https://github.com/wadimiusz/centigpt?rev=bb2fc8dfc0bffac7f3f1648680d3cb7a0ac9d736#bb2fc8dfc0bffac7f3f1648680d3cb7a0ac9d736" }
+dependencies = [
+    { name = "datasets" },
+    { name = "lightning" },
+    { name = "loguru" },
+    { name = "numpy" },
+    { name = "tokenizers" },
+    { name = "torch" },
+    { name = "transformers" },
+    { name = "tyro" },
+]
+
+[[package]]
 name = "click"
 version = "8.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1165,26 +1180,11 @@ wheels = [
 ]
 
 [[package]]
-name = "nanogpt"
-version = "0.1.0"
-source = { git = "https://github.com/wadimiusz/nanogpt?rev=f51d8f15acd44870618c8de3dd1c36ad2f9bff8d#f51d8f15acd44870618c8de3dd1c36ad2f9bff8d" }
-dependencies = [
-    { name = "datasets" },
-    { name = "lightning" },
-    { name = "loguru" },
-    { name = "numpy" },
-    { name = "tokenizers" },
-    { name = "torch" },
-    { name = "transformers" },
-    { name = "tyro" },
-]
-
-[[package]]
 name = "nerode"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "nanogpt" },
+    { name = "centigpt" },
     { name = "numpy" },
     { name = "torch" },
     { name = "tqdm" },
@@ -1204,8 +1204,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "centigpt", git = "https://github.com/wadimiusz/centigpt?rev=bb2fc8dfc0bffac7f3f1648680d3cb7a0ac9d736" },
     { name = "matplotlib", marker = "extra == 'plots'", specifier = ">=3.10" },
-    { name = "nanogpt", git = "https://github.com/wadimiusz/nanogpt?rev=f51d8f15acd44870618c8de3dd1c36ad2f9bff8d" },
     { name = "numpy", specifier = ">=2.5.2" },
     { name = "torch", specifier = ">=2.13.0" },
     { name = "tqdm", specifier = ">=4.67.1" },
