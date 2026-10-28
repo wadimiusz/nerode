@@ -1,0 +1,34 @@
+device cpu; prefixes of length 12, continuations of length 2, behaviour horizon 3, 3000 steps
+
+parity PDFA, seed 0: 6 Nerode classes, 300 prefixes, optimal loss 0.949 (89s)
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.899   -0.059     -0.006   0.015    nan     nan
+  random   block0   1.899    0.748      0.080   0.119  0.496 -11.352
+  random   block1   1.899    0.805      0.292   0.218  0.673   0.620
+  random   norm_f   1.899    0.805      0.292   0.218  0.673   0.620
+  trained  embed    1.003   -0.007      0.007   0.331    nan     nan
+  trained  block0   1.003    0.310      0.258   0.334  2.437   1.578
+  trained  block1   1.003    0.565      0.167   0.247  0.752   0.298
+  trained  norm_f   1.003    0.554      0.175   0.215  0.831   0.297
+
+parity PDFA, seed 1: 6 Nerode classes, 300 prefixes, optimal loss 0.953 (94s)
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.894    0.016      0.021   0.052    nan     nan
+  random   block0   1.894    0.596      0.166   0.176 -0.779  -0.231
+  random   block1   1.894    0.738      0.509   0.284 -0.658  -0.293
+  random   norm_f   1.894    0.738      0.509   0.284 -0.658  -0.293
+  trained  embed    0.975    0.007      0.009   0.349    nan     nan
+  trained  block0   0.975    0.427      0.242   0.367  0.295   0.763
+  trained  block1   0.975    0.712      0.138   0.401  0.239   0.260
+  trained  norm_f   0.975    0.718      0.134   0.397  0.257   0.264
+
+parity PDFA, seed 2: 6 Nerode classes, 300 prefixes, optimal loss 0.865 (94s)
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.237   -0.016      0.002   0.058    nan     nan
+  random   block0   1.237    0.793      0.160   0.286  0.443   0.295
+  random   block1   1.237    0.794      0.192   0.336  0.317   0.174
+  random   norm_f   1.237    0.794      0.192   0.336  0.317   0.174
+  trained  embed    0.888   -0.006      0.027   0.343    nan     nan
+  trained  block0   0.888    0.263      0.153   0.432  0.168   2.401
+  trained  block1   0.888    0.682      0.214   0.572  0.094   0.090
+  trained  norm_f   0.888    0.682      0.214   0.572  0.093   0.086

@@ -1,0 +1,170 @@
+[
+ {
+  "seed": 0,
+  "steps": 10000,
+  "batch": 128,
+  "fresh": true,
+  "d_model": 64,
+  "lr": 0.003,
+  "loss": 0.977,
+  "h_opt": 0.949,
+  "gap": 0.028,
+  "acc": {
+   "1": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "2": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "3": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0001
+   },
+   "4": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 0.988,
+    "kl_weighted": 0.0003
+   },
+   "5": {
+    "acc_weighted": 0.996,
+    "acc_after2_weighted": 0.999,
+    "acc_uniform": 0.918,
+    "kl_weighted": 0.0019
+   },
+   "6": {
+    "acc_weighted": 0.973,
+    "acc_after2_weighted": 0.977,
+    "acc_uniform": 0.768,
+    "kl_weighted": 0.0097
+   },
+   "7": {
+    "acc_weighted": 0.944,
+    "acc_after2_weighted": 0.943,
+    "acc_uniform": 0.688,
+    "kl_weighted": 0.0196
+   }
+  },
+  "secs": 258
+ },
+ {
+  "seed": 0,
+  "steps": 30000,
+  "batch": 128,
+  "fresh": true,
+  "d_model": 64,
+  "lr": 0.003,
+  "loss": 0.9601,
+  "h_opt": 0.949,
+  "gap": 0.0112,
+  "acc": {
+   "1": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "2": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "3": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "4": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "5": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 0.988,
+    "kl_weighted": 0.0001
+   },
+   "6": {
+    "acc_weighted": 0.999,
+    "acc_after2_weighted": 0.999,
+    "acc_uniform": 0.968,
+    "kl_weighted": 0.0003
+   },
+   "7": {
+    "acc_weighted": 0.999,
+    "acc_after2_weighted": 0.999,
+    "acc_uniform": 0.96,
+    "kl_weighted": 0.0005
+   }
+  },
+  "secs": 765
+ },
+ {
+  "seed": 0,
+  "steps": 100000,
+  "batch": 128,
+  "fresh": true,
+  "d_model": 64,
+  "lr": 0.003,
+  "loss": 0.9568,
+  "h_opt": 0.949,
+  "gap": 0.0078,
+  "acc": {
+   "1": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "2": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "3": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "4": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 1.0,
+    "kl_weighted": 0.0
+   },
+   "5": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 0.996,
+    "kl_weighted": 0.0
+   },
+   "6": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 0.996,
+    "kl_weighted": 0.0
+   },
+   "7": {
+    "acc_weighted": 1.0,
+    "acc_after2_weighted": 1.0,
+    "acc_uniform": 0.987,
+    "kl_weighted": 0.0001
+   }
+  },
+  "secs": 2620
+ }
+]

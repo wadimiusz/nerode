@@ -1,0 +1,67 @@
+device cpu; prefixes of length 12, continuations of length 2, behaviour horizon 3, 3000 steps
+
+plain PDFA, seed 0: 4 Nerode classes, 300 prefixes, optimal loss 0.840 (141s)
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.452   -0.005      0.028   0.039    nan     nan
+  random   block0   1.452    0.726      0.190   0.185    nan     nan
+  random   block1   1.452    0.786      0.241   0.266    nan     nan
+  random   norm_f   1.452    0.786      0.241   0.266    nan     nan
+  trained  embed    0.842    0.008      0.080   0.564    nan     nan
+  trained  block0   0.842    0.569      0.315   0.587    nan     nan
+  trained  block1   0.842    0.884      0.168   0.828    nan     nan
+  trained  norm_f   0.842    0.883      0.164   0.829    nan     nan
+
+plain PDFA, seed 1: 6 Nerode classes, 300 prefixes, optimal loss 0.757 (94s)
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    2.023   -0.022      0.026   0.042    nan     nan
+  random   block0   2.023    0.607      0.140   0.192    nan     nan
+  random   block1   2.023    0.750      0.390   0.324    nan     nan
+  random   norm_f   2.023    0.750      0.390   0.324    nan     nan
+  trained  embed    0.819    0.035     -0.007   0.330    nan     nan
+  trained  block0   0.819    0.328      0.257   0.300    nan     nan
+  trained  block1   0.819    0.636      0.325   0.364    nan     nan
+  trained  norm_f   0.819    0.623      0.320   0.357    nan     nan
+
+plain PDFA, seed 2: 6 Nerode classes, 300 prefixes, optimal loss 0.979 (94s)
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.530   -0.036     -0.050   0.043    nan     nan
+  random   block0   1.530    0.750      0.055   0.184    nan     nan
+  random   block1   1.530    0.726      0.028   0.381    nan     nan
+  random   norm_f   1.530    0.726      0.028   0.381    nan     nan
+  trained  embed    1.022    0.020      0.003   0.461    nan     nan
+  trained  block0   1.022    0.436      0.397   0.351    nan     nan
+  trained  block1   1.022    0.749      0.419   0.213    nan     nan
+  trained  norm_f   1.022    0.748      0.416   0.209    nan     nan
+
+parity PDFA, seed 0: 6 Nerode classes, 300 prefixes, optimal loss 0.949 (94s)
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.899   -0.062      0.001   0.024    nan     nan
+  random   block0   1.899    0.709      0.069   0.136  0.628 -11.352
+  random   block1   1.899    0.773      0.194   0.232  0.757   0.620
+  random   norm_f   1.899    0.773      0.194   0.232  0.757   0.620
+  trained  embed    1.003   -0.024     -0.004   0.392    nan     nan
+  trained  block0   1.003    0.389      0.286   0.311  2.432   1.578
+  trained  block1   1.003    0.678      0.142   0.122  1.426   0.298
+  trained  norm_f   1.003    0.667      0.163   0.110  1.470   0.297
+
+parity PDFA, seed 1: 6 Nerode classes, 300 prefixes, optimal loss 0.953 (95s)
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.894    0.019      0.022   0.065    nan     nan
+  random   block0   1.894    0.612      0.192   0.168 -0.650  -0.231
+  random   block1   1.894    0.691      0.396   0.276 -0.612  -0.293
+  random   norm_f   1.894    0.691      0.396   0.276 -0.612  -0.293
+  trained  embed    0.975   -0.009      0.017   0.280    nan     nan
+  trained  block0   0.975    0.251      0.096   0.298  1.457   0.763
+  trained  block1   0.975    0.621      0.067   0.291  1.117   0.260
+  trained  norm_f   0.975    0.617      0.060   0.290  1.152   0.264
+
+parity PDFA, seed 2: 6 Nerode classes, 300 prefixes, optimal loss 0.865 (94s)
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.237   -0.024     -0.013   0.050    nan     nan
+  random   block0   1.237    0.849      0.184   0.286  0.481   0.295
+  random   block1   1.237    0.844      0.207   0.336  0.306   0.174
+  random   norm_f   1.237    0.844      0.207   0.336  0.306   0.174
+  trained  embed    0.888   -0.010      0.030   0.313    nan     nan
+  trained  block0   0.888    0.404      0.225   0.409  1.857   2.401
+  trained  block1   0.888    0.791      0.277   0.635  0.540   0.090
+  trained  norm_f   0.888    0.791      0.277   0.635  0.534   0.086

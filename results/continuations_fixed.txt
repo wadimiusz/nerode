@@ -1,0 +1,121 @@
+device cuda; prefixes of length 12, continuations of length 2, behaviour horizon 3, 100000 steps, batch 128, fresh data True, min group separation 0.1
+
+parity_hand PDFA, seed 0: 6 Nerode classes, 300 prefixes, optimal loss 0.997 (567s)
+  group separation 0.287; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:1.000
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.957   -0.064     -0.029   0.020    nan     nan
+  random   block0   1.957    0.635      0.096   0.134    nan   7.703
+  random   block1   1.957    0.761      0.319   0.243    nan     nan
+  random   norm_f   1.957    0.761      0.319   0.243    nan     nan
+  trained  embed    1.003   -0.002      0.040   0.037    nan     nan
+  trained  block0   1.003    0.003      0.059   0.001  1.867   0.976
+  trained  block1   1.003    0.954      0.201   0.560  0.665   0.009
+  trained  norm_f   1.003    0.894      0.053   0.540  0.641   0.004
+
+parity_hand PDFA, seed 1: 6 Nerode classes, 300 prefixes, optimal loss 0.997 (597s)
+  group separation 0.287; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:1.000
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.912   -0.001     -0.008   0.070    nan     nan
+  random   block0   1.912    0.661      0.214   0.170  0.941   0.081
+  random   block1   1.912    0.773      0.429   0.272  0.288   0.074
+  random   norm_f   1.912    0.773      0.429   0.272  0.288   0.074
+  trained  embed    1.000   -0.009      0.010  -0.005    nan     nan
+  trained  block0   1.000   -0.042      0.016  -0.024  1.786   1.971
+  trained  block1   1.000    0.961      0.185   0.528  0.678   0.009
+  trained  norm_f   1.000    0.871      0.172   0.585  0.666   0.008
+
+parity_hand PDFA, seed 2: 6 Nerode classes, 300 prefixes, optimal loss 0.997 (595s)
+  group separation 0.287; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:1.000
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.709   -0.031     -0.020   0.055    nan     nan
+  random   block0   1.709    0.783     -0.023   0.163 -3.107   3.565
+  random   block1   1.709    0.736     -0.059   0.358 -21.001   2.579
+  random   norm_f   1.709    0.736     -0.059   0.358 -21.002   2.579
+  trained  embed    1.003    0.019     -0.014   0.032    nan     nan
+  trained  block0   1.003   -0.010      0.048   0.041  1.912   1.488
+  trained  block1   1.003    0.950      0.245   0.575  0.659   0.002
+  trained  norm_f   1.003    0.872      0.173   0.545  0.700  -0.001
+
+parity_hand PDFA, seed 3: 6 Nerode classes, 300 prefixes, optimal loss 0.997 (589s)
+  group separation 0.287; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:1.000
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.714   -0.041      0.002   0.044    nan     nan
+  random   block0   1.714    0.711      0.032   0.301 -0.228  -1.806
+  random   block1   1.714    0.663     -0.058   0.260 -0.126  -0.102
+  random   norm_f   1.714    0.663     -0.058   0.260 -0.126  -0.102
+  trained  embed    0.991    0.022     -0.036   0.011    nan     nan
+  trained  block0   0.991   -0.140      0.021  -0.072  2.080   1.653
+  trained  block1   0.991    0.956      0.163   0.595  0.664   0.006
+  trained  norm_f   0.991    0.898      0.255   0.560  0.710   0.017
+
+parity_hand PDFA, seed 4: 6 Nerode classes, 300 prefixes, optimal loss 0.997 (556s)
+  group separation 0.287; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:1.000
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.989   -0.032      0.005   0.017    nan     nan
+  random   block0   1.989    0.643     -0.136   0.198 -0.926  -0.639
+  random   block1   1.989    0.801     -0.076   0.365    nan  -1.497
+  random   norm_f   1.989    0.801     -0.076   0.365    nan  -1.497
+  trained  embed    0.999    0.003     -0.006  -0.010    nan     nan
+  trained  block0   0.999   -0.039      0.003  -0.021  1.243   0.781
+  trained  block1   0.999    0.945      0.232   0.550  0.658  -0.001
+  trained  norm_f   0.999    0.906      0.130   0.571  0.652  -0.002
+
+parity PDFA, seed 0: 6 Nerode classes, 300 prefixes, optimal loss 0.949 (543s)
+  group separation 0.294; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:1.000
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.899   -0.062      0.001   0.020    nan     nan
+  random   block0   1.899    0.709      0.069   0.136  0.628 -11.352
+  random   block1   1.899    0.773      0.194   0.232  0.757   0.620
+  random   norm_f   1.899    0.773      0.194   0.232  0.757   0.620
+  trained  embed    0.952    0.004      0.010   0.023    nan     nan
+  trained  block0   0.952    0.019      0.030   0.053  1.977   1.921
+  trained  block1   0.952    0.903      0.146   0.482  0.743   0.024
+  trained  norm_f   0.952    0.956      0.639   0.529  0.743   0.022
+
+parity PDFA, seed 1: 6 Nerode classes, 300 prefixes, optimal loss 0.953 (555s)
+  group separation 0.152; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:0.999
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.894   -0.008     -0.027   0.054    nan     nan
+  random   block0   1.894    0.612      0.192   0.168 -0.650  -0.231
+  random   block1   1.894    0.691      0.396   0.276 -0.612  -0.293
+  random   norm_f   1.894    0.691      0.396   0.276 -0.612  -0.293
+  trained  embed    0.955    0.040      0.052   0.172    nan     nan
+  trained  block0   0.955    0.308      0.211   0.135  1.737   0.406
+  trained  block1   0.955    0.773     -0.004   0.276  0.881   0.003
+  trained  norm_f   0.955    0.798      0.266   0.328  1.062   0.001
+
+parity PDFA, seed 2: 6 Nerode classes, 300 prefixes, optimal loss 0.986 (567s)
+  group separation 0.134; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:1.000
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.681   -0.006      0.017   0.062    nan     nan
+  random   block0   1.681    0.816      0.030   0.218  0.503   0.470
+  random   block1   1.681    0.787      0.012   0.403  0.503   0.566
+  random   norm_f   1.681    0.787      0.012   0.403  0.503   0.566
+  trained  embed    0.990    0.031      0.041   0.088    nan     nan
+  trained  block0   0.990    0.209      0.160   0.150  1.549   0.361
+  trained  block1   0.990    0.922     -0.024   0.535  0.668   0.001
+  trained  norm_f   0.990    0.862      0.017   0.568  0.716  -0.002
+
+parity PDFA, seed 3: 6 Nerode classes, 300 prefixes, optimal loss 0.923 (551s)
+  group separation 0.295; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:1.000
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.703    0.048      0.010   0.067    nan     nan
+  random   block0   1.703    0.801      0.181   0.402  2.947     nan
+  random   block1   1.703    0.743      0.117   0.387 -0.134 -21.621
+  random   norm_f   1.703    0.743      0.117   0.387 -0.134 -21.620
+  trained  embed    0.921   -0.020      0.019   0.123    nan     nan
+  trained  block0   0.921    0.641      0.408   0.418  1.551   0.832
+  trained  block1   0.921    0.972      0.320   0.398  1.198  -0.001
+  trained  norm_f   0.921    0.972      0.355   0.378  1.251  -0.002
+
+parity PDFA, seed 4: 6 Nerode classes, 300 prefixes, optimal loss 0.979 (576s)
+  group separation 0.139; trained model tracks the hidden bit, weighted accuracy by prefix length: 1:1.000 2:1.000 3:1.000 4:1.000 5:1.000 6:1.000 7:1.000
+  model    layer     loss  rho_beh rho_far|nx  rho_w0    hid  hid_w0
+  random   embed    1.868    0.014      0.011   0.029    nan     nan
+  random   block0   1.868    0.633      0.086   0.167  0.156   1.531
+  random   block1   1.868    0.796      0.157   0.278  1.761   4.013
+  random   norm_f   1.868    0.796      0.157   0.278  1.761   4.013
+  trained  embed    0.977   -0.004      0.038   0.144    nan     nan
+  trained  block0   0.977    0.248      0.273   0.126  1.258   0.744
+  trained  block1   0.977    0.832     -0.314   0.128  1.046  -0.002
+  trained  norm_f   0.977    0.890      0.086   0.228  1.327  -0.002

@@ -1,0 +1,60 @@
+
+plain PDFA: 4 states -> 3 Nerode classes (0 share their next-symbol distribution), 3 symbols, seed 0 (50s)
+  optimal loss 0.808 nats | class from (position, last token): acc 0.796, within same-next-symbol groups nan (chance 0.5)
+  model    layer     loss  probe  p_hid  centr  c_hid  ratio    rho
+  random   embed    1.418  0.720    nan  0.720    nan    nan  1.000
+  random   block0   1.418  0.776    nan  0.668    nan  0.787  0.500
+  random   block1   1.418  0.778    nan  0.662    nan  0.821  0.500
+  random   norm_f   1.418  0.776    nan  0.667    nan  0.812  0.500
+  trained  embed    0.818  0.720    nan  0.720    nan    nan  1.000
+  trained  block0   0.818  0.860    nan  0.845    nan  0.409  1.000
+  trained  block1   0.818  0.968    nan  0.932    nan  0.396  1.000
+  trained  norm_f   0.818  0.969    nan  0.939    nan  0.348  1.000
+
+plain PDFA: 6 states -> 6 Nerode classes (0 share their next-symbol distribution), 3 symbols, seed 1 (56s)
+  optimal loss 0.756 nats | class from (position, last token): acc 0.492, within same-next-symbol groups nan (chance 0.5)
+  model    layer     loss  probe  p_hid  centr  c_hid  ratio    rho
+  random   embed    2.023  0.433    nan  0.286    nan    nan  0.064
+  random   block0   2.023  0.564    nan  0.486    nan  0.621 -0.032
+  random   block1   2.023  0.594    nan  0.426    nan  0.638  0.036
+  random   norm_f   2.023  0.595    nan  0.426    nan  0.640  0.025
+  trained  embed    0.791  0.433    nan  0.286    nan    nan  0.057
+  trained  block0   0.791  0.723    nan  0.588    nan  0.575  0.411
+  trained  block1   0.791  0.851    nan  0.692    nan  0.507  0.504
+  trained  norm_f   0.791  0.849    nan  0.745    nan  0.496  0.696
+
+plain PDFA: 8 states -> 8 Nerode classes (0 share their next-symbol distribution), 4 symbols, seed 2 (56s)
+  optimal loss 1.171 nats | class from (position, last token): acc 0.516, within same-next-symbol groups nan (chance 0.5)
+  model    layer     loss  probe  p_hid  centr  c_hid  ratio    rho
+  random   embed    1.901  0.445    nan  0.221    nan    nan  0.209
+  random   block0   1.901  0.514    nan  0.282    nan  0.952  0.182
+  random   block1   1.901  0.520    nan  0.278    nan  0.951  0.264
+  random   norm_f   1.901  0.520    nan  0.292    nan  0.913  0.253
+  trained  embed    1.223  0.445    nan  0.221    nan    nan  0.222
+  trained  block0   1.223  0.691    nan  0.558    nan  0.715  0.385
+  trained  block1   1.223  0.835    nan  0.717    nan  0.655  0.514
+  trained  norm_f   1.223  0.834    nan  0.763    nan  0.588  0.626
+
+SHARED-emission PDFA: 6 states -> 6 Nerode classes (6 share their next-symbol distribution), 3 symbols, seed 3 (58s)
+  optimal loss 0.911 nats | class from (position, last token): acc 0.545, within same-next-symbol groups 0.843 (chance 0.5)
+  model    layer     loss  probe  p_hid  centr  c_hid  ratio    rho
+  random   embed    1.691  0.502  0.821  0.284  0.691    nan  0.189
+  random   block0   1.691  0.577  0.862  0.415  0.753  0.818  0.239
+  random   block1   1.691  0.575  0.857  0.419  0.757  0.845  0.243
+  random   norm_f   1.691  0.576  0.855  0.416  0.749  0.844  0.250
+  trained  embed    0.946  0.502  0.821  0.284  0.683    nan  0.154
+  trained  block0   0.946  0.731  0.916  0.633  0.847  0.716  0.571
+  trained  block1   0.946  0.808  0.919  0.571  0.777  0.649  0.596
+  trained  norm_f   0.946  0.812  0.918  0.597  0.763  0.622  0.593
+
+SHARED-emission PDFA: 8 states -> 8 Nerode classes (8 share their next-symbol distribution), 3 symbols, seed 4 (61s)
+  optimal loss 1.028 nats | class from (position, last token): acc 0.469, within same-next-symbol groups 0.847 (chance 0.5)
+  model    layer     loss  probe  p_hid  centr  c_hid  ratio    rho
+  random   embed    1.855  0.421  0.842  0.317  0.729    nan  0.128
+  random   block0   1.855  0.481  0.867  0.335  0.739  0.966  0.111
+  random   block1   1.855  0.516  0.878  0.355  0.759  0.939  0.099
+  random   norm_f   1.855  0.516  0.880  0.356  0.756  0.942  0.102
+  trained  embed    1.061  0.421  0.842  0.317  0.728    nan  0.120
+  trained  block0   1.061  0.627  0.923  0.513  0.832  0.801  0.383
+  trained  block1   1.061  0.695  0.918  0.475  0.744  0.769  0.715
+  trained  norm_f   1.061  0.697  0.919  0.581  0.831  0.760  0.716
