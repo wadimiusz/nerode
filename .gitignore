@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Tool caches (removed by `make clean`)
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Experiment outputs: checkpoints, plots, run logs. Small result files that
+# the README refers to are committed under results/ by hand.
+out/
+ckpt/

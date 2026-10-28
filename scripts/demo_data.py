@@ -1,7 +1,7 @@
 """Export data for the interactive explainer page (parity automaton).
 
-Trains the model on a parity automaton (see nerode_continuations.py) and, for
-every prefix up to MAX_LEN symbols, records:
+Trains the model on a parity automaton (see nerode.automata) and, for every
+prefix up to MAX_LEN symbols, records:
 - the true automaton state (group, parity) and Nerode class,
 - the true and the model's next-symbol distribution,
 - 2-D coordinates of the residual stream at the last position of the prefix,
@@ -10,30 +10,32 @@ every prefix up to MAX_LEN symbols, records:
 
 Also exports KL(true || model) by position for "easy" and "hard" positions.
 
-Run from the repo root:  uv run python experiments/demo_data.py
+Run from the repository root:  uv run python scripts/demo_data.py
 Well-trained model on the hand-chosen automaton (needs a GPU for a sane time):
-    uv run python experiments/demo_data.py --kind parity_hand --fresh --steps 100000
+    uv run python scripts/demo_data.py --kind parity_hand --fresh --steps 100000
 """
 
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import itertools
 import json
 from pathlib import Path
 
 import numpy as np
 import torch
+from nanogpt.model import GPT
 
-_here = Path(__file__).parent
-_spec = importlib.util.spec_from_file_location(
-    "nerode_continuations", _here / "nerode_continuations.py"
+from nerode.automata import (
+    entropy_rate,
+    group_separation,
+    hand_parity_pdfa,
+    minimise,
+    parity_pdfa,
+    sample,
 )
-assert _spec is not None and _spec.loader is not None
-nc = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(nc)
-ng = nc.ng
+from nerode.readout import last_residuals, parity_bit_accuracy
+from nerode.training import DEVICE, eval_loss, fit, make_model
 
 MAX_LEN = 7
 SEED = 0
@@ -55,26 +57,26 @@ def main() -> None:
     ap.add_argument("--batch", type=int, default=128)
     ap.add_argument("--fresh", action="store_true", help="train on fresh samples")
     ap.add_argument("--min-sep", type=float, default=0.0)
-    ap.add_argument("--out", default=str(_here / "nerode_out" / "demo_data.json"))
+    ap.add_argument("--out", default="out/demo_data.json")
     args = ap.parse_args()
     seed = args.seed
     rng = np.random.default_rng(seed)
     if args.kind == "parity_hand":
-        p = nc.hand_parity_pdfa()
+        p = hand_parity_pdfa()
     else:
-        p = nc.parity_pdfa(3, rng, min_sep=args.min_sep)
-    cls_of_state = ng.minimise(p)
+        p = parity_pdfa(3, rng, min_sep=args.min_sep)
+    cls_of_state = minimise(p)
     n_sym, bos, seq_len = 3, 3, 24
 
-    syms, states = ng.sample(p, 6000, seq_len, rng)
+    syms, states = sample(p, 6000, seq_len, rng)
     x = torch.tensor(np.concatenate([np.full((len(syms), 1), bos), syms], 1))
-    model = ng.make_model(n_sym, seq_len, 64, 2, seed)
+    model = make_model(n_sym, seq_len, 64, 2, seed)
 
-    def monitor(m: torch.nn.Module) -> dict[str, str]:
-        acc = nc.parity_bit_accuracy(m, p)
+    def monitor(m: GPT) -> dict[str, str]:
+        acc = parity_bit_accuracy(m, p)
         return {"bit@3": f"{acc[3]:.3f}", "bit@7": f"{acc[7]:.3f}"}
 
-    ng.fit(
+    fit(
         model,
         p,
         x[:5000],
@@ -84,12 +86,12 @@ def main() -> None:
         batch=args.batch,
         fresh=args.fresh,
         desc=f"{args.kind} seed {seed}",
-        h_opt=ng.entropy_rate(p, states),
+        h_opt=entropy_rate(p, states),
         monitor=monitor,
     )
-    loss = ng.eval_loss(model, x[5000:])
-    bit_acc = nc.parity_bit_accuracy(model, p, max_len=MAX_LEN)
-    h_opt = ng.entropy_rate(p, states)
+    loss = eval_loss(model, x[5000:])
+    bit_acc = parity_bit_accuracy(model, p, max_len=MAX_LEN)
+    h_opt = entropy_rate(p, states)
 
     prefixes = [
         list(t)
@@ -108,17 +110,17 @@ def main() -> None:
     with torch.no_grad():
         for k, idx in by_len.items():
             arr = np.array([[bos] + prefixes[i] for i in idx])
-            logits = model(torch.tensor(arr).to(ng.DEVICE))[:, -1, :n_sym]
+            logits = model(torch.tensor(arr).to(DEVICE))[:, -1, :n_sym]
             probs[idx] = torch.softmax(logits.float(), -1).cpu().numpy()
-            h_now[idx] = nc.last_residuals(model, arr)[LAYER]
+            h_now[idx] = last_residuals(model, arr)[LAYER]
             arr2 = np.concatenate([arr, np.full((len(idx), 1), 2)], 1)
-            h_after2[idx] = nc.last_residuals(model, arr2)[LAYER]
+            h_after2[idx] = last_residuals(model, arr2)[LAYER]
 
     true_state = []
     for pr in prefixes:
         q = 0
-        for a in pr:
-            q = int(p.delta[q, a])
+        for sym in pr:
+            q = int(p.delta[q, sym])
         true_state.append(q)
     true_state_arr = np.array(true_state)
     group = true_state_arr // 2
@@ -157,7 +159,7 @@ def main() -> None:
     partner = np.arange(p.n_states) ^ 1
     grp = np.arange(p.n_states) // 2
     with torch.no_grad():
-        logits = model(x[5000:, :-1].to(ng.DEVICE))
+        logits = model(x[5000:, :-1].to(DEVICE))
         logp = torch.log_softmax(logits.float(), -1)[..., :n_sym].cpu().numpy()
     st = states[5000:, :seq_len]
     true = p.emit[st]
@@ -199,7 +201,7 @@ def main() -> None:
             batch=args.batch,
             fresh=args.fresh,
         ),
-        group_separation=round(nc.group_separation(p.emit[0::2]), 4),
+        group_separation=round(group_separation(p.emit[0::2]), 4),
         bit_acc={str(k): round(v, 4) for k, v in bit_acc.items()},
         layer="block1",
         max_len=MAX_LEN,
