@@ -35,7 +35,7 @@ from nerode.automata import (
     sample,
 )
 from nerode.readout import last_residuals, parity_bit_accuracy
-from nerode.training import DEVICE, eval_loss, fit, make_model
+from nerode.training import DEVICE, OUT_DIR, eval_loss, fit, make_model
 
 MAX_LEN = 7
 SEED = 0
@@ -57,7 +57,7 @@ def main() -> None:
     ap.add_argument("--batch", type=int, default=128)
     ap.add_argument("--fresh", action="store_true", help="train on fresh samples")
     ap.add_argument("--min-sep", type=float, default=0.0)
-    ap.add_argument("--out", default="out/demo_data.json")
+    ap.add_argument("--out", default=str(OUT_DIR / "demo_data.json"))
     args = ap.parse_args()
     seed = args.seed
     rng = np.random.default_rng(seed)

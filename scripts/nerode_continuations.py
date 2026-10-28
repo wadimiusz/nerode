@@ -16,7 +16,7 @@ from pathlib import Path
 from tqdm.auto import tqdm
 
 from nerode.continuations import run_one
-from nerode.training import DEVICE
+from nerode.training import DEVICE, OUT_DIR
 
 
 def main() -> None:
@@ -28,7 +28,7 @@ def main() -> None:
     ap.add_argument("--prefix-len", type=int, default=12)
     ap.add_argument("--w-len", type=int, default=2)
     ap.add_argument("--horizon", type=int, default=3)
-    ap.add_argument("--out", default="out/continuations.txt")
+    ap.add_argument("--out", default=str(OUT_DIR / "continuations.txt"))
     ap.add_argument(
         "--w-symbols",
         type=int,

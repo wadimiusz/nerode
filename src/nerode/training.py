@@ -7,7 +7,7 @@ batch, and caches the trained weights under a key that covers the automaton
 and every training setting.
 
 Outputs go to the directory named by the NERODE_OUT environment variable
-(default: `out/` in the current directory); checkpoints to its `ckpt/`.
+(default: `out/` at the root of this checkout); checkpoints to its `ckpt/`.
 NERODE_THREADS sets the number of CPU threads (default: at most 4).
 """
 
@@ -36,7 +36,20 @@ torch.set_num_threads(
 )
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-OUT_DIR = Path(os.environ.get("NERODE_OUT", "out"))
+
+def default_out_dir() -> Path:
+    """`out/` at the root of this checkout (the package is installed in
+    editable mode), so that scripts find the same checkpoint cache from any
+    working directory; plain `out/` if the package is installed elsewhere."""
+    root = Path(__file__).resolve().parents[2]
+    return root / "out" if (root / "pyproject.toml").exists() else Path("out")
+
+
+OUT_DIR = (
+    Path(os.environ["NERODE_OUT"])
+    if os.environ.get("NERODE_OUT")
+    else default_out_dir()
+)
 CKPT_DIR = OUT_DIR / "ckpt"
 
 

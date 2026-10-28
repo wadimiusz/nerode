@@ -46,7 +46,9 @@ Requires Python 3.14 and [uv](https://docs.astral.sh/uv/). `make install`
 Run from the repository root. Everything works on a CPU; a GPU is used when
 available. Outputs go to `out/` (override with the `NERODE_OUT` environment
 variable); trained models are cached in `out/ckpt/`, keyed by the automaton
-and every training setting, so a second run only repeats the analysis.
+and every training setting, so a second run only repeats the analysis. On a
+CPU the model is small enough that many threads slow it down, so at most 4 are
+used; `NERODE_THREADS` overrides that.
 
 | Script | What it does | CPU time |
 | --- | --- | --- |
@@ -100,7 +102,7 @@ are not.
 | `results/geometry.txt` | `nerode_geometry.py` with the pilot defaults (1500 steps on 5000 fixed sequences) |
 | `results/geometry_fixed.txt` | `nerode_geometry.py --fresh --steps 100000` (findings 1 and 2) |
 | `results/continuations.txt` | `nerode_continuations.py` with the pilot defaults |
-| `results/continuations_parity_w01.txt` | the same with `--w-symbols 0 1` |
+| `results/continuations_parity_w01.txt` | `nerode_continuations.py --kinds parity --w-symbols 0 1` |
 | `results/continuations_fixed.txt` | `nerode_continuations.py --kinds parity_hand parity --seeds 0 1 2 3 4 --fresh --steps 100000 --min-sep 0.1` (finding 3, first table) |
 | `results/bit_probe_concat.txt`, `.json` | `bit_probe.py` on those ten models (finding 3, probes) |
 | `results/demo_data.json` | `demo_data.py --kind parity_hand --fresh --steps 100000` (the demo) |

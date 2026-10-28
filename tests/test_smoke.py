@@ -11,10 +11,18 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from nerode import training
 from nerode.automata import hand_parity_pdfa, minimise, random_pdfa, sample
 from nerode.training import ckpt_path, make_model
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_outputs_default_to_the_repo_not_the_cwd() -> None:
+    """Running a script from another directory must find the same checkpoint
+    cache, not silently retrain into a fresh ./out there."""
+    assert training.default_out_dir() == ROOT / "out"
+    assert training.OUT_DIR.is_absolute()
 
 
 def test_sample_follows_the_automaton() -> None:
@@ -58,8 +66,9 @@ def test_ckpt_key_matches_the_pilot_cache() -> None:
 
 def test_quick_continuations_end_to_end(tmp_path: Path) -> None:
     """`scripts/nerode_continuations.py --quick`: one seed, 200 steps, 60
-    prefixes, both automaton kinds; on the CPU, into a temporary directory."""
-    out = tmp_path / "continuations.txt"
+    prefixes, both automaton kinds; on the CPU, into a temporary directory.
+    No --out: the result file must follow NERODE_OUT, as the cache does."""
+    out = tmp_path / "out" / "continuations.txt"
     # outputs redirected; CUDA hidden so the test measures the CPU path everywhere
     env = {
         **os.environ,
@@ -68,7 +77,7 @@ def test_quick_continuations_end_to_end(tmp_path: Path) -> None:
     }
     script = ROOT / "scripts" / "nerode_continuations.py"
     subprocess.run(
-        [sys.executable, str(script), "--quick", "--out", str(out)],
+        [sys.executable, str(script), "--quick"],
         check=True,
         cwd=ROOT,
         env=env,

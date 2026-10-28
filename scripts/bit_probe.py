@@ -36,6 +36,7 @@ from nerode.probes import (
     load_models,
     window_baseline,
 )
+from nerode.training import OUT_DIR
 
 
 def main() -> None:
@@ -46,7 +47,7 @@ def main() -> None:
     ap.add_argument("--batch", type=int, default=128)
     ap.add_argument("--min-sep", type=float, default=0.1)
     ap.add_argument("--n-seq", type=int, default=2500)
-    ap.add_argument("--out", default="out/bit_probe.json")
+    ap.add_argument("--out", default=str(OUT_DIR / "bit_probe.json"))
     ap.add_argument(
         "--layers", nargs="+", default=["block0", "block1", "norm_f", "all"]
     )
