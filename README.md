@@ -59,6 +59,7 @@ used; `NERODE_THREADS` overrides that.
 | `scripts/bit_probe.py` | Linear and MLP probes for the hidden bit on the cached parity models, by symbols since the last `2`; does the model apply the bit after a `2`? | needs the cached models |
 | `scripts/bit_probe_by_gap.py` | The same probes against window baselines, by exact gap | needs the cached models |
 | `scripts/bit_probe_long_gaps.py` | Probes trained only on long-gap positions | needs the cached models |
+| `scripts/extract_automaton.py` | Extracts each parity model's automaton from its behaviour (distributions over continuations, clustered at radius eps) and compares it with the true one: states, purity, KL on held-out sequences | needs the cached models |
 | `scripts/train_sweep.py` | How many steps a parity model needs to reach the optimal loss | ~1 min per 1000 steps |
 
 ```bash
