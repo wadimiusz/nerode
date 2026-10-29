@@ -9,6 +9,7 @@ import pytest
 from nerode.automata import hand_parity_pdfa, minimise, parity_pdfa
 from nerode.extraction import (
     all_futures,
+    belief_weights,
     extract,
     next_symbol,
     purity,
@@ -81,3 +82,14 @@ def test_wrong_bit_weight_recovers_a_mixture() -> None:
     lam, resid = wrong_bit_weight(model, right, wrong)
     assert np.allclose(lam, lam_true)
     assert np.allclose(resid, 0.0)
+
+
+def test_belief_weights_recover_a_mixture_of_states() -> None:
+    p = hand_parity_pdfa()
+    per_state = state_signatures(p, 3)
+    rng = np.random.default_rng(0)
+    b_true = rng.dirichlet(np.ones(6), size=20)
+    b_true[0] = np.eye(6)[2]  # a pure state too
+    b, resid = belief_weights(b_true @ per_state, per_state)
+    assert np.allclose(b, b_true, atol=1e-3)
+    assert np.all(resid < 1e-3)

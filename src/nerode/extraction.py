@@ -138,6 +138,41 @@ def wrong_bit_weight(
     return lam, model_error(sig_model, mix)
 
 
+def _project_to_simplex(x: np.ndarray) -> np.ndarray:
+    """Euclidean projection of every row of x onto the probability simplex
+    (Duchi et al. 2008)."""
+    u = -np.sort(-x, axis=1)
+    css = np.cumsum(u, axis=1) - 1.0
+    idx = np.arange(1, x.shape[1] + 1)
+    rho = (u - css / idx > 0).sum(1)
+    theta = css[np.arange(len(x)), rho - 1] / rho
+    return np.maximum(x - theta[:, None], 0.0)
+
+
+def belief_weights(
+    sig_model: np.ndarray, per_state: np.ndarray, iters: int = 3000
+) -> tuple[np.ndarray, np.ndarray]:
+    """Write every model signature as a mixture of the automaton's states:
+    sig_model ~ b @ per_state with b on the probability simplex, b chosen by
+    least squares (projected gradient with Nesterov momentum). If the model's
+    predictions are a belief over hidden states, as for an observer unsure
+    which state it is in, the residual is small and b is that belief.
+
+    Returns b (n, n_states) and the residual: total variation between the
+    model and the best mixture."""
+    n, s = len(sig_model), len(per_state)
+    gram = per_state @ per_state.T
+    step = 1.0 / np.linalg.eigvalsh(gram).max()
+    target = sig_model @ per_state.T
+    b = np.full((n, s), 1.0 / s)
+    prev, y = b, b
+    for t in range(iters):
+        b = _project_to_simplex(y - step * (y @ gram - target))
+        y = b + (t / (t + 3)) * (b - prev)
+        prev = b
+    return b, model_error(sig_model, b @ per_state)
+
+
 def next_symbol(sig: np.ndarray, n_sym: int) -> np.ndarray:
     """(n, n_sym): the next-symbol distribution, a marginal of the signature."""
     return sig.reshape(len(sig), n_sym, -1).sum(-1)

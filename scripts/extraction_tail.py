@@ -18,6 +18,10 @@ tiny ones. This script looks at the tiny ones at one radius eps:
 - the model's uncertainty about the hidden bit: its signature written as a
   mixture of the true state's and the wrong-bit state's signatures; the weight
   on the wrong bit, and how much error the mixture leaves unexplained;
+- whether the model's prediction is a belief over the automaton's states:
+  its signature as a mixture of all states' signatures; the weight on the
+  true state and the error the best such mixture leaves (if small, the
+  model's error is uncertainty about which state it is in);
 - transitions out of large states that do not land in a large state, e.g. one
   state's extensions by "2" split across tiny states.
 
@@ -34,6 +38,7 @@ from pathlib import Path
 import numpy as np
 
 from nerode.extraction import (
+    belief_weights,
     extract,
     majority_state,
     model_error,
@@ -90,8 +95,16 @@ def main() -> None:
             err = model_error(sig, right)
             # states are 2 * group + bit, so state ^ 1 flips the bit
             lam, resid = wrong_bit_weight(sig, right, per_state[pre.state ^ 1])
+            belief, bresid = belief_weights(sig, per_state)
+            on_true = belief[np.arange(len(belief)), pre.state]
             labels, ext = extract(sig, pre, a.eps, p.n_symbols)
-            report(emit, kind, seed, pre, sig, err, lam, resid, labels, ext)
+            extra = {
+                "wrong bit": lam,
+                "bit-mix unexplained": resid,
+                "belief on true state": on_true,
+                "belief-mix unexplained": bresid,
+            }
+            report(emit, kind, seed, pre, sig, err, extra, labels, ext)
             emit(f"  ({time.time() - t0:.0f}s)")
 
     out = Path(a.out)
@@ -99,7 +112,7 @@ def main() -> None:
     out.write_text("\n".join(lines) + "\n")
 
 
-def report(emit, kind, seed, pre, sig, err, lam, resid, labels, ext) -> None:
+def report(emit, kind, seed, pre, sig, err, extra, labels, ext) -> None:
     w = pre.weight
     big = ext.mass >= 0.01
     in_tail = ~big[labels]
@@ -158,12 +171,16 @@ def report(emit, kind, seed, pre, sig, err, lam, resid, labels, ext) -> None:
             m = (x >= lo) & (x <= hi)
             if w[m].sum() > 0:
                 rng = f"{lo}-{hi}" if hi < 99 else f"{lo}+"
-                cells.append(
-                    f"{rng}: tail {w[m & in_tail].sum() / w[m].sum():.3f}, "
-                    f"error {wmean(err[m], w[m]):.4f}, wrong bit "
-                    f"{wmean(lam[m], w[m]):.3f}, unexplained {wmean(resid[m], w[m]):.4f}"
+                more = ", ".join(
+                    f"{k} {wmean(v[m], w[m]):.4f}" for k, v in extra.items()
                 )
-        emit(f"  by {name}: " + "; ".join(cells))
+                cells.append(
+                    f"    {rng}: tail {w[m & in_tail].sum() / w[m].sum():.3f}, "
+                    f"error {wmean(err[m], w[m]):.4f}, {more}"
+                )
+        emit(f"  by {name}:")
+        for c in cells:
+            emit(c)
 
     # transitions out of large states that do not land in a large state
     for s in big_ids:
