@@ -5,13 +5,13 @@ from __future__ import annotations
 import torch
 
 from nerode.heads import _blocks, _pre_proj, ablate, attention_weights, head_means
-from nerode.training import make_model
+from nerode.training import DEVICE, make_model
 
 
 def _model_and_input():
     model = make_model(3, 24, 32, 2, seed=0)
     x = torch.randint(0, 4, (5, 12), generator=torch.Generator().manual_seed(0))
-    return model, x
+    return model, x.to(DEVICE)
 
 
 def test_attention_weights_reproduce_the_attention_output() -> None:
@@ -28,7 +28,7 @@ def test_attention_weights_reproduce_the_attention_output() -> None:
             mine = (weights[layer] @ v).transpose(1, 2).reshape(b, t, -1)
             assert torch.allclose(mine, pre[layer], atol=1e-5)
             assert torch.allclose(
-                weights[layer].sum(-1), torch.ones(b, attn.n_heads, t)
+                weights[layer].sum(-1), torch.ones(b, attn.n_heads, t, device=DEVICE)
             )
             h = block(h)
 
