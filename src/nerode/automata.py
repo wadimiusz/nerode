@@ -13,7 +13,14 @@ Three constructions:
 - `parity_pdfa`:        states are (group g, parity bit b). Symbol 0 flips b,
                         1 keeps it, 2 reads b (the next group depends on it) and
                         resets it. The bit changes nothing about the next symbol;
-- `hand_parity_pdfa`:   one parity automaton chosen by hand for the demo.
+- `hand_parity_pdfa`:   one parity automaton chosen by hand for the demo; with
+                        `reset=True`, a variant in which symbol 1 resets the
+                        group instead of rotating it (see the function);
+- `make_parity`:        any of the parity automata by name;
+- `flipflop_pdfa`:      two states set by symbols 1 and 2 and kept by 0 (a
+                        pure reset automaton, the simplest rung of the ladder
+                        for one-layer models);
+- `make_automaton`:     any of the above by name.
 """
 
 from __future__ import annotations
@@ -166,11 +173,19 @@ def parity_pdfa(n_groups: int, rng: np.random.Generator, min_sep: float = 0.0) -
     return _parity_from_groups(group_next, alt, emit_g)
 
 
-def hand_parity_pdfa() -> PDFA:
+def hand_parity_pdfa(reset: bool = False) -> PDFA:
     """A parity automaton chosen by hand for the demo: three groups with
     clearly different emissions (every symbol likely in every group, so long
     stretches without a 2 still occur), a cyclic group structure, and the bit
-    sending a 2 to a different group than it would go to otherwise."""
+    sending a 2 to a different group than it would go to otherwise.
+
+    Between two 2s the symbols 0 and 1 rotate the groups (0 adds 1 mod 3, 1 adds
+    2 mod 3) and 0 flips the bit, so tracking the state over a long stretch
+    means counting mod 6. With `reset=True`, symbol 1 sends every group to
+    group 0 instead: the group is then recovered at every 1, and over a long
+    stretch only the bit (the parity of the 0s since the last 2) must be
+    carried. Everything else is the same, so the two automata differ only in
+    whether symbol 1 acts on the groups as a rotation or as a reset."""
     emit_g = np.array(
         [
             [0.55, 0.25, 0.20],  # group 0 likes 0
@@ -185,8 +200,62 @@ def hand_parity_pdfa() -> PDFA:
             [0, 1, 0],
         ]
     )
+    if reset:
+        group_next[:, 1] = 0
     alt = np.array([2, 0, 1])  # after 2 with b = 1
     return _parity_from_groups(group_next, alt, emit_g)
+
+
+def hand_counter(q: int) -> int:
+    """For the demo automaton (`hand_parity_pdfa()` without reset): the state
+    2g + b as one counter n mod 6, with n = g mod 3 and n = b mod 2. Between
+    two 2s, symbol 0 adds 1 to the counter and symbol 1 adds 2, so the group and
+    the bit are the two halves of one cyclic count (tests check this). A state
+    with the same group and the other bit is the counter shifted by 3; the
+    other groups are shifts by 1, 2, 4 and 5."""
+    g, b = q // 2, q % 2
+    return (4 * g + 3 * b) % 6
+
+
+PARITY_KINDS = ("parity", "parity_hand", "parity_hand_reset")
+AUTOMATON_KINDS = (*PARITY_KINDS, "flipflop", "flipflop_long")
+
+
+def make_parity(kind: str, seed: int, min_sep: float = 0.0) -> PDFA:
+    """A parity automaton by name: "parity" (random, drawn from `seed`),
+    "parity_hand" or "parity_hand_reset" (fixed; `seed` only seeds the model)."""
+    if kind == "parity":
+        return parity_pdfa(3, np.random.default_rng(seed), min_sep=min_sep)
+    if kind == "parity_hand":
+        return hand_parity_pdfa()
+    if kind == "parity_hand_reset":
+        return hand_parity_pdfa(reset=True)
+    raise ValueError(f"unknown parity automaton {kind!r}; one of {PARITY_KINDS}")
+
+
+def flipflop_pdfa(p_zero: float = 0.6) -> PDFA:
+    """Two states: symbol 1 sets state 0, symbol 2 sets state 1, symbol 0
+    keeps the state (a flip-flop: only resets, no group). State 0 likes 1 and
+    state 1 likes 2, so the state shows in what comes next; 0 is the most likely
+    symbol in both, so long stretches of 0s, over which the state must be
+    carried, still occur. `p_zero` is the probability of 0 in both states; the
+    rest is split 70:30 between the liked and the other reset symbol (the
+    default 0.6 gives the original [0.6, 0.28, 0.12])."""
+    rest = 1.0 - p_zero
+    delta = np.array([[0, 0, 1], [1, 0, 1]])
+    emit = np.array(
+        [[p_zero, 0.7 * rest, 0.3 * rest], [p_zero, 0.3 * rest, 0.7 * rest]]
+    )
+    return PDFA(delta, emit)
+
+
+def make_automaton(kind: str, seed: int, min_sep: float = 0.0) -> PDFA:
+    """Any automaton by name: one of `AUTOMATON_KINDS`."""
+    if kind == "flipflop":
+        return flipflop_pdfa()
+    if kind == "flipflop_long":  # long runs of 0s: 0.85**8 ~ 0.27
+        return flipflop_pdfa(p_zero=0.85)
+    return make_parity(kind, seed, min_sep)
 
 
 def _parity_from_groups(

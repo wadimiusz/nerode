@@ -6,13 +6,20 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from nerode.automata import hand_parity_pdfa, minimise, parity_pdfa
+from nerode.automata import (
+    hand_counter,
+    hand_parity_pdfa,
+    make_parity,
+    minimise,
+    parity_pdfa,
+)
 from nerode.extraction import (
     all_futures,
     belief_weights,
     extract,
     next_symbol,
     purity,
+    sample_gap_prefixes,
     sample_prefixes,
     signatures_from_model,
     signatures_from_pdfa,
@@ -93,3 +100,35 @@ def test_belief_weights_recover_a_mixture_of_states() -> None:
     b, resid = belief_weights(b_true @ per_state, per_state)
     assert np.allclose(b, b_true, atol=1e-3)
     assert np.all(resid < 1e-3)
+
+
+def test_gap_prefixes_end_the_given_gap_after_a_2() -> None:
+    p = make_parity("parity_hand_reset", 0)
+    for gap in (0, 5, 12):
+        pre = sample_gap_prefixes(p, 50, gap, 21, np.random.default_rng(gap))
+        assert np.isclose(pre.weight.sum(), 1.0)
+        for u, q in zip(pre.seqs, pre.state):
+            assert len(u) <= 21 and symbols_since_last(u, 2) == gap and 2 in u
+            s = 0
+            for a in u:
+                s = int(p.delta[s, a])
+            assert s == q
+
+
+def test_reset_variant_differs_only_in_symbol_1() -> None:
+    rot, res = make_parity("parity_hand", 0), make_parity("parity_hand_reset", 0)
+    assert int(minimise(res).max()) + 1 == 6
+    assert np.array_equal(rot.emit, res.emit)
+    assert np.array_equal(rot.delta[:, [0, 2]], res.delta[:, [0, 2]])
+    assert all(int(res.delta[q, 1]) // 2 == 0 for q in range(6))  # reset to group 0
+    assert all(int(res.delta[q, 1]) % 2 == q % 2 for q in range(6))  # bit kept
+
+
+def test_demo_automaton_is_a_counter_mod_6() -> None:
+    p = make_parity("parity_hand", 0)
+    assert sorted(hand_counter(q) for q in range(6)) == list(range(6))
+    for q in range(6):
+        n = hand_counter(q)
+        assert hand_counter(int(p.delta[q, 0])) == (n + 1) % 6
+        assert hand_counter(int(p.delta[q, 1])) == (n + 2) % 6
+        assert hand_counter(q ^ 1) == (n + 3) % 6  # flipped bit = shift by 3

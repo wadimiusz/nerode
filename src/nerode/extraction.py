@@ -73,6 +73,47 @@ def sample_prefixes(
     )
 
 
+def sample_gap_prefixes(
+    p: PDFA, n: int, gap: int, max_len: int, rng: np.random.Generator, symbol: int = 2
+) -> Prefixes:
+    """n prefixes that end exactly `gap` symbols after the last `symbol`, for
+    looking at long gaps, which natural samples hardly contain.
+
+    Each prefix is a head of random length sampled from the automaton (0 to
+    max_len - gap - 1 symbols), then `symbol`, then `gap` symbols sampled from
+    the automaton's emissions with `symbol` removed and the rest renormalised.
+    Every such prefix has positive probability, so its state is well defined,
+    but the prefixes are not a sample from the automaton's own distribution:
+    weights are uniform over the draws."""
+    assert gap + 1 <= max_len
+    count: dict[tuple[int, ...], int] = {}
+    state_of: dict[tuple[int, ...], int] = {}
+    heads, head_states = sample(p, n, max_len - gap - 1, rng)
+    emit = p.emit.copy()
+    emit[:, symbol] = 0.0
+    emit /= emit.sum(1, keepdims=True)
+    cum = emit.cumsum(1)
+    for i in range(n):
+        h = int(rng.integers(0, max_len - gap))
+        u = heads[i, :h].tolist() + [symbol]
+        q = int(p.delta[head_states[i, h], symbol])
+        for _ in range(gap):
+            a = int((rng.random() > cum[q]).sum())
+            u.append(a)
+            q = int(p.delta[q, a])
+        key = tuple(u)
+        count[key] = count.get(key, 0) + 1
+        state_of[key] = q
+    seqs = sorted(count, key=lambda u: (len(u), u))
+    w = np.array([count[u] for u in seqs], dtype=np.float64)
+    return Prefixes(
+        seqs=seqs,
+        weight=w / w.sum(),
+        state=np.array([state_of[u] for u in seqs]),
+        index={u: i for i, u in enumerate(seqs)},
+    )
+
+
 def all_futures(n_sym: int, k: int) -> np.ndarray:
     """(n_sym**k, k): every continuation of length k, first symbol slowest, so
     that a signature reshaped to (n_sym, n_sym**(k-1)) has the next symbol on

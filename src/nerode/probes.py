@@ -28,7 +28,7 @@ import torch
 from centigpt.model import GPT
 from torch import nn
 
-from nerode.automata import PDFA, hand_parity_pdfa, parity_pdfa, sample
+from nerode.automata import PDFA, make_parity, sample
 from nerode.readout import residuals
 from nerode.training import DEVICE, ckpt_path, make_model
 
@@ -41,10 +41,7 @@ def load_models(
 ) -> tuple[PDFA, GPT, GPT]:
     """The parity automaton, the trained model from the checkpoint cache (never
     trained here) and a random-weights twin with the same initialisation."""
-    if kind == "parity_hand":
-        p = hand_parity_pdfa()
-    else:
-        p = parity_pdfa(3, np.random.default_rng(seed), min_sep=min_sep)
+    p = make_parity(kind, seed, min_sep)
     trained = make_model(3, SEQ_LEN, 64, 2, seed)
     dummy = torch.zeros((1, SEQ_LEN + 1), dtype=torch.long)
     path = ckpt_path(
